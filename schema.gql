@@ -1,0 +1,245 @@
+#   * Create products
+#   * Update products
+#   * Delete products
+#   * Disable products
+#   * Show clients orders (allOrders)
+#   * Upload images per product.
+# ----------------------------------------------
+#   * See products
+#   * See the product details
+#   * Buy products (inside this resolver include creeate an order)
+#   * Add products to cart
+#   * Like products
+#   * Show my order
+
+
+type Query {
+    allOrders: [Order]
+    allProducts(offset: Int = 0, limit: Int = 10): PaginatedProducts
+    productDetail(id: String): Product
+    productVariants(id: String): String
+    myOrders(userId: String): Order
+    myCart(userId: String): Cart
+    productsByCategory(categoryId: ID!, offset: Int = 0, limit: Int = 10): PaginatedProducts
+}
+
+type Mutation {
+    # Product mutations
+    createProduct(input: ProductInput): Product
+    updateProduct(id: String, input: ProductInput): Product
+    deleteProduct(id: String): Boolean
+    disableProduct(id: String): Boolean
+    uploadImage(variantId: String, input: FileInput): Boolean
+    buyProduct(id: ID) : Boolean
+    addCartDetail(cartId: ID, input: CartDetailInput): CartDetail
+    likeProduct(userId: ID, productId: ID) : Boolean
+
+    # Authorization mutations
+    signUp(input: SignUpInput!): AuthPayload!
+    signIn(input: SignInInput!): AuthPayload!
+    signOut: Boolean!
+    forgotPassword(email: String!): Boolean!
+    resetPassword(input: ResetPasswordInput!): Boolean!
+    updatePassword(input: UpdatePasswordInput!): Boolean!
+}
+
+type Subscription {
+    onLikeAdded(id: ID): Like
+}
+
+input BrandInput {
+    id: String
+    name: String
+}
+
+input FileInput {
+    id: String
+    key: String
+    idKey: String
+    bucket: String
+}
+
+input ProductInput {
+    brand: BrandInput
+    name: String
+    price: Float
+}
+
+input VariantInput {
+    file: FileInput
+    size: Size
+    hexColor: String
+    textColor: TextColor
+    stock: Int
+    updatedAt: String
+}
+
+type Role {
+    id: String
+    users: [User]
+}
+
+type User {
+    id: String
+    orders: [Order]
+    nickname: String
+    firstName: String
+    lastName: String
+    email: String
+    roles: [Role]
+    resetPasswordToken: String
+    resetPasswordExpires: String
+    createdAt: String
+    updatedAt: String
+}
+
+type Order {
+    id: String
+    orderDetails: [OrderDetail]
+    createdAt: String
+    stripeCheckoutId: String
+    user: User
+}
+
+type OrderDetail {
+    id: String
+    product: Product
+    quantity: Int
+    price: Float
+    order: Order
+}
+
+type Product {
+    id: String
+    brand: Brand
+    variants: [Variant]
+    name: String
+    price: Float
+    categories: [Category]
+    createdAt: String
+    updatedAt: String
+    likes: [Like]
+}
+
+type Variant {
+    id: String
+    files: File
+    size: Size
+    hexColor: String
+    textColor: TextColor
+    stock: Int
+    createdAt: String
+    updatedAt: String
+}
+
+type Brand {
+    id:String
+    name: String
+}
+
+type File {
+    id: String
+    key: String
+    idKey: String
+    bucket: String
+}
+
+type Category {
+    id: String
+    name: String
+    active: Boolean
+    parentCategory: Category
+    products: [Product]
+}
+
+type Like {
+    id: String
+    user: User
+    product: Product
+    createdAt: String
+}
+
+type PaginatedProducts {
+    edges: [Product!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    currentOffset: Int!
+}
+
+type Cart {
+    id: String
+    user: User
+    cartDetails: [CartDetail]
+    createdAt: String
+    updatedAt: String
+}
+
+type CartDetail {
+    id: String
+    cart: Cart
+    product: Product
+    quantity: Int
+    createdAt: String
+    updatedAt: String
+}
+
+input CartDetailInput {
+    productId: ID!
+    quantity: Int!
+}
+
+input SignUpInput {
+    email: String!
+    password: String!
+    firstName: String!
+    lastName: String!
+    nickname: String
+}
+
+input SignInInput {
+    email: String!
+    password: String!
+}
+
+input ResetPasswordInput {
+    token: String!
+    newPassword: String!
+}
+
+input UpdatePasswordInput {
+    currentPassword: String!
+    newPassword: String!
+}
+
+
+type AuthPayload {
+    token: String!
+    user: User!
+}
+
+enum Size {
+  SMALL
+  MEDIUM
+  LARGE
+  X_LARGE
+  XX_LARGE
+  YEARS_XS
+}
+
+enum TextColor {
+    GREEN
+    BLUE
+    YELLOW
+    PINK
+    SKY_BLUE
+    BROWN
+    BLACK
+    WHITE
+    ORANGE
+    PURPLE
+}
